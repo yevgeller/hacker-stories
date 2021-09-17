@@ -1,38 +1,52 @@
 import * as React from "react";
 
-const List = (props) => (
-  <ul>
-    {props.list.map((item) => (
-      <Item key={item.objectID} item={item} />
-    ))}
-  </ul>
-);
+const List = (props) => {
+  console.log("List renders...");
+  return (
+    <ul>
+      {props.list.map((item) => (
+        <Item key={item.objectID} item={item} />
+      ))}
+    </ul>
+  );
+};
 
-const Item = (props) => (
-  <li key={props.item.objectID}>
-    <span>
-      <a href={props.item.url}>{props.item.title}</a>
-    </span>
-    <span>{props.item.author}</span>
-    <span>{props.item.num_comments}</span>
-    <span>{props.item.points}</span>
-  </li>
-);
+const Item = (props) => {
+  console.log("Item renders...");
+  return (
+    <li key={props.item.objectID}>
+      <span>
+        <a href={props.item.url}>{props.item.title}</a>
+      </span>
+      <span>{props.item.author}</span>
+      <span>{props.item.num_comments}</span>
+      <span>{props.item.points}</span>
+    </li>
+  );
+};
 
 const Search = () => {
+  const [searchTerm, setSearchTerm] = React.useState("");
+
+  console.log("Search renders...");
+
   const handleChange = (event) => {
-    console.log(event.target.value);
+    setSearchTerm(event.target.value);
   };
 
   return (
     <div>
       <label htmlFor="search">Search:</label>
       <input id="search" type="text" onChange={handleChange} />
+      <p>
+        Searching for <strong>{searchTerm ? searchTerm : "nothing"}</strong>
+      </p>
     </div>
   );
 };
 
 const App = () => {
+  console.log("App renders...");
   const stories = [
     {
       title: "React",
