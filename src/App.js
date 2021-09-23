@@ -105,6 +105,7 @@ const App = () => {
         searchTerm={searchTerm}
         onSearchInput={handleSearchInput}
         onSearchSubmit={handleSearchSubmit}
+        className={"button button_large"}
       />
 
       {stories.isError && <p>Something went wrong ...</p>}
@@ -118,7 +119,12 @@ const App = () => {
   );
 };
 
-const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
+const SearchForm = ({
+  searchTerm,
+  onSearchInput,
+  onSearchSubmit,
+  className,
+}) => (
   <form onSubmit={onSearchSubmit} className="search-form">
     <InputWithLabel
       id="search"
@@ -129,11 +135,7 @@ const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
       <strong>Search:</strong>
     </InputWithLabel>
 
-    <button
-      type="submit"
-      disabled={!searchTerm}
-      className="button button_large"
-    >
+    <button type="submit" disabled={!searchTerm} className={className}>
       Submit
     </button>
   </form>
@@ -145,6 +147,7 @@ const InputWithLabel = ({
   type = "text",
   onInputChange,
   isFocused,
+  buttonClassName,
   children,
 }) => {
   const inputRef = React.useRef();
@@ -167,7 +170,7 @@ const InputWithLabel = ({
         type={type}
         value={value}
         onChange={onInputChange}
-        className="input"
+        className={buttonClassName}
       />
     </>
   );
