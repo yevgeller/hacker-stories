@@ -1,12 +1,12 @@
 import * as React from "react";
 
-const List = ({ list, onRemoveItem }) => {
+const List = ({ list, onRemoveItem }) => (
   <ul>
     {list.map((item) => (
-      <Item key={item.objectId} item={item} onRemoveItem={onRemoveItem} />
+      <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
     ))}
-  </ul>;
-};
+  </ul>
+);
 
 const Item = ({ item, onRemoveItem }) => (
   <li>

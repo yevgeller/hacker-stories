@@ -12,6 +12,7 @@ const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
     >
       <strong>Search:</strong>
     </InputWithLabel>
+
     <button type="submit" disabled={!searchTerm}>
       Submit
     </button>
