@@ -6,6 +6,29 @@ import { List } from "./List";
 
 const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
 
+const extractSearchTerm = (url) => url.replace(API_ENDPOINT, "");
+const getLastSearches = (urls) =>
+  urls
+    .reduce((result, url, index) => {
+      const searchTerm = extractSearchTerm(url);
+
+      if (index === 0) {
+        return result.concat(searchTerm);
+      }
+
+      const previousSearchTerm = result[result.length - 1];
+
+      if (searchTerm === previousSearchTerm) {
+        return result;
+      } else {
+        return result.concat(searchTerm);
+      }
+    }, [])
+    .slice(-6)
+    .slice(0, -1)
+    .map(extractSearchTerm);
+const getUrl = (searchTerm) => `${API_ENDPOINT}${searchTerm}`;
+
 const useSemiPersistentState = (key, initialState) => {
   const [value, setValue] = React.useState(
     localStorage.getItem(key) || initialState
@@ -51,10 +74,35 @@ const storiesReducer = (state, action) => {
   }
 };
 
+const LastSearches = ({ lastSearches, onLastSearch }) => (
+  <>
+    {lastSearches.map((searchTerm, index) => (
+      <button
+        key={searchTerm + index}
+        type="button"
+        onClick={() => onLastSearch(searchTerm)}
+      >
+        {searchTerm}
+      </button>
+    ))}
+  </>
+);
+
 const App = () => {
   const [searchTerm, setSearchTerm] = useSemiPersistentState("search", "React");
 
-  const [url, setUrl] = React.useState(`${API_ENDPOINT}${searchTerm}`);
+  const [urls, setUrls] = React.useState([getUrl(searchTerm)]);
+  const handleLastSearch = (searchTerm) => {
+    setSearchTerm(searchTerm);
+    handleSearch(searchTerm);
+  };
+
+  const handleSearch = (searchTerm) => {
+    const url = getUrl(searchTerm);
+    setUrls(urls.concat(url));
+  };
+
+  const lastSearches = getLastSearches(urls);
 
   const [stories, dispatchStories] = React.useReducer(storiesReducer, {
     data: [],
@@ -66,7 +114,8 @@ const App = () => {
     dispatchStories({ type: "STORIES_FETCH_INIT" });
 
     try {
-      const result = await axios.get(url);
+      const lastUrl = urls[urls.length - 1];
+      const result = await axios.get(lastUrl);
 
       dispatchStories({
         type: "STORIES_FETCH_SUCCESS",
@@ -75,7 +124,7 @@ const App = () => {
     } catch {
       dispatchStories({ type: "STORIES_FETCH_FAILURE" });
     }
-  }, [url]);
+  }, [urls]);
 
   React.useEffect(() => {
     handleFetchStories();
@@ -93,7 +142,7 @@ const App = () => {
   };
 
   const handleSearchSubmit = (event) => {
-    setUrl(`${API_ENDPOINT}${searchTerm}`);
+    handleSearch(searchTerm);
 
     event.preventDefault();
   };
@@ -107,7 +156,10 @@ const App = () => {
         onSearchInput={handleSearchInput}
         onSearchSubmit={handleSearchSubmit}
       />
-
+      <LastSearches
+        lastSearches={lastSearches}
+        onLastSearch={handleLastSearch}
+      />
       <hr />
 
       {stories.isError && <p>Something went wrong ...</p>}
@@ -120,57 +172,5 @@ const App = () => {
     </div>
   );
 };
-
-// const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
-//   <form onSubmit={onSearchSubmit} className="search-form">
-//     <InputWithLabel
-//       id="search"
-//       value={searchTerm}
-//       isFocused
-//       onInputChange={onSearchInput}
-//     >
-//       <strong>Search:</strong>
-//     </InputWithLabel>
-
-//     <button
-//       type="submit"
-//       disabled={!searchTerm}
-//       className="button button_large"
-//     >
-//       Submit
-//     </button>
-//   </form>
-// );
-
-// const List = React.memo(
-//   ({ list, onRemoveItem }) =>
-//     console.log("B:List") || (
-//       <ul>
-//         {list.map((item) => (
-//           <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
-//         ))}
-//       </ul>
-//     )
-// );
-
-// const Item = ({ item, onRemoveItem }) => (
-//   <li className="item">
-//     <span style={{ width: "40%" }}>
-//       <a href={item.url}>{item.title}</a>
-//     </span>
-//     <span style={{ width: "30%" }}>{item.author}</span>
-//     <span style={{ width: "10%" }}>{item.num_comments}</span>
-//     <span style={{ width: "10%" }}>{item.points}</span>
-//     <span style={{ width: "10%" }}>
-//       <button
-//         type="button"
-//         onClick={() => onRemoveItem(item)}
-//         className="button button_small"
-//       >
-//         <Check height="18px" width="18px" />
-//       </button>
-//     </span>
-//   </li>
-// );
 
 export default App;
